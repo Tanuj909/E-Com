@@ -2,6 +2,7 @@ package com.ecommerce.app.auth.service.impl;
 
 import com.ecommerce.app.auth.dto.RegisterRequest;
 import com.ecommerce.app.auth.dto.AuthResponse;
+import com.ecommerce.app.auth.dto.LoginRequest;
 import com.ecommerce.app.auth.entity.Role;
 import com.ecommerce.app.auth.entity.User;
 import com.ecommerce.app.auth.entity.UserRole;
@@ -10,9 +11,13 @@ import com.ecommerce.app.auth.repository.UserRepository;
 import com.ecommerce.app.auth.repository.UserRoleRepository;
 import com.ecommerce.app.auth.service.AuthService;
 import com.ecommerce.app.common.enums.UserStatus;
-
 import lombok.RequiredArgsConstructor;
 
+import java.net.Authenticator;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +29,8 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
+    
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -62,4 +69,37 @@ public class AuthServiceImpl implements AuthService {
                 .userId(savedUser.getId())
                 .build();
     }
+
+	@Override
+	public AuthResponse login(LoginRequest request) {
+		
+		Authentication authentication = new UsernamePasswordAuthenticationToken
+				                            (request.getEmail(), request.getPassword());
+		
+		return AuthResponse.builder()
+				.message("Login Success")
+				.build();
+	}
+    
+//    @Override
+//    public AuthResponse login(LoginRequest request) {
+//    	
+//    	//Check If Email Exist or not
+//    	User user = userRepository.findByEmail(request.getEmail())
+//    			.orElseThrow(() -> new RuntimeException("User With Email Not Found."));
+//    	
+//    	//Password Match
+//    	if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+//    		throw new RuntimeException("Incorrect Password!");
+//    	}
+//    	
+//		//JWT Service Yha call Hogi!
+//    	
+//    	return AuthResponse.builder()
+//    			.message("Login Success")
+//    			.userId(user.getId())
+//    			.build();
+//    }
+    
+    
 }

@@ -6,11 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.ecommerce.app.auth.dto.AuthResponse;
+import com.ecommerce.app.auth.dto.LoginRequest;
 import com.ecommerce.app.auth.dto.RegisterRequest;
 import com.ecommerce.app.auth.service.AuthService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +27,17 @@ public class AuthController {
 		
 		return ResponseEntity
 				.status(HttpStatus.CREATED)
+				.body(response);
+	}
+	
+//	Login API
+	@PostMapping("/login")
+	public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request){
+		
+		AuthResponse response = authService.login(request);
+		
+		return ResponseEntity
+				.status(HttpStatus.OK)
 				.body(response);
 	}
 	
