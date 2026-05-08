@@ -9,6 +9,7 @@ import com.ecommerce.app.auth.entity.UserRole;
 import com.ecommerce.app.auth.repository.RoleRepository;
 import com.ecommerce.app.auth.repository.UserRepository;
 import com.ecommerce.app.auth.repository.UserRoleRepository;
+import com.ecommerce.app.auth.security.JwtService;
 import com.ecommerce.app.auth.service.AuthService;
 import com.ecommerce.app.common.enums.UserStatus;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.net.Authenticator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +30,11 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
-    private final PasswordEncoder passwordEncoder;
     
+//    Security Dependency Injections
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -73,11 +77,21 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public AuthResponse login(LoginRequest request) {
 		
-		Authentication authentication = new UsernamePasswordAuthenticationToken
-				                            (request.getEmail(), request.getPassword());
-		
+		Authentication authentication =
+				authenticationManager.authenticate(	
+						new UsernamePasswordAuthenticationToken
+                        (request.getEmail(), 
+                         request.getPassword())
+                        );			
+	    UserDetails userDetails =
+	            (UserDetails) authentication.getPrincipal();  //Type Casting to UserDetails
+	    
+	    String token =
+	            jwtService.generateToken(userDetails);
+	    
 		return AuthResponse.builder()
 				.message("Login Success")
+				.token(token)
 				.build();
 	}
     
