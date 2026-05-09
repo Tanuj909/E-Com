@@ -9,6 +9,7 @@ import com.ecommerce.app.auth.entity.UserRole;
 import com.ecommerce.app.auth.repository.RoleRepository;
 import com.ecommerce.app.auth.repository.UserRepository;
 import com.ecommerce.app.auth.repository.UserRoleRepository;
+import com.ecommerce.app.auth.security.CustomUserDetailsService;
 import com.ecommerce.app.auth.security.JwtService;
 import com.ecommerce.app.auth.service.AuthService;
 import com.ecommerce.app.common.enums.UserStatus;
@@ -35,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -66,11 +68,18 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRoleRepository.save(userRole);
+        
+        UserDetails userDetails =
+                customUserDetailsService.loadUserByUsername(savedUser.getEmail());
+
+        String token =
+                jwtService.generateToken(userDetails);
 
         // 🟢 Step 5: Return response
         return AuthResponse.builder()
                 .message("User registered successfully")
                 .userId(savedUser.getId())
+                .token(token)
                 .build();
     }
 
