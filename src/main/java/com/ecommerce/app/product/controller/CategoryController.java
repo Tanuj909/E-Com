@@ -63,6 +63,7 @@ public class CategoryController {
 		return ResponseEntity.ok(response);
 	}
 	
+//--------------------------Disable Category By Id---------------------//
 	@PatchMapping("/{id}/disable")
 	public ResponseEntity<String> disableCategory(
 	        @PathVariable Long id) {
